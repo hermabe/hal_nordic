@@ -66,6 +66,7 @@
 // There is a HW bug which results in RX amount value not being updated when FIFO was empty.
 // It is then hard to determine if FIFO contained anything or not.
 #define USE_WORKAROUND_FOR_FLUSHRX_ANOMALY 1
+#define FLUSHRX_ANOMALY_FILL 0xCC
 
 // Size of the RX HW FIFO
 #define UARTE_HW_RX_FIFO_SIZE 5
@@ -1468,7 +1469,7 @@ static void rx_flush(NRF_UARTE_Type * p_uarte, uarte_control_block_t * p_cb)
          * determine that by watermarking flush buffer to check if it was overwritten.
          * However, if fifo contained amount of bytes equal to last transfer and
          * bytes are equal to watermarking it will be dropped. */
-        memset(p_cb->rx.flush.p_buffer, 0xAA, UARTE_HW_RX_FIFO_SIZE);
+        memset(p_cb->rx.flush.p_buffer, FLUSHRX_ANOMALY_FILL, UARTE_HW_RX_FIFO_SIZE);
     }
 
     nrfy_uarte_rx_buffer_set(p_uarte, p_cb->rx.flush.p_buffer, UARTE_HW_RX_FIFO_SIZE);
@@ -1492,7 +1493,7 @@ static void rx_flush(NRF_UARTE_Type * p_uarte, uarte_control_block_t * p_cb)
         {
             for (size_t i = 0; i < UARTE_HW_RX_FIFO_SIZE; i++)
             {
-                if (p_cb->rx.flush.p_buffer[i] != 0xAA)
+                if (p_cb->rx.flush.p_buffer[i] != FLUSHRX_ANOMALY_FILL)
                 {
                     return;
                 }
